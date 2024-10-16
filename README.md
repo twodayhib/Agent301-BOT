@@ -27,7 +27,7 @@ Pastikan Anda telah menginstal Python3.9 dan PIP.
 
 2. **Instal Requirements:**
    ```bash
-   pip install -r requirements.txt #or pip3 requirements.txt
+   pip install -r requirements.txt #or pip3 install -r requirements.txt
    ```
 
 ## Konfigurasi
