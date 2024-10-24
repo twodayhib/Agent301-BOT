@@ -225,7 +225,7 @@ class Agent301:
             )
             time.sleep(1)
 
-            tasks =self.get_tasks(query)
+            tasks = self.get_tasks(query)
             if tasks:
                 for task in tasks:
                     task_type = task['type']
@@ -268,39 +268,39 @@ class Agent301:
                                         f"{Fore.RED+Style.BRIGHT}Isn't Completed{Style.RESET_ALL}"
                                         f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
                                     )
-                                    
                                 count += 1
 
-                        self.log(
-                            f"{Fore.MAGENTA+Style.BRIGHT}[ Task{Style.RESET_ALL}"
-                            f"{Fore.WHITE+Style.BRIGHT} {task['category']} {Style.RESET_ALL}"
-                            f"{Fore.MAGENTA+Style.BRIGHT}-{Style.RESET_ALL}"
-                            f"{Fore.WHITE+Style.BRIGHT} {task['title']} {Style.RESET_ALL}"
-                            f"{Fore.GREEN+Style.BRIGHT}Is Started{Style.RESET_ALL}"
-                            f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
-                        )
-
-                        complete = self.complete_tasks(query, task_type)
-                        if complete['is_completed']:
-                            self.log(
-                                f"{Fore.MAGENTA+Style.BRIGHT}[ Task{Style.RESET_ALL}"
-                                f"{Fore.WHITE+Style.BRIGHT} {task['category']} {Style.RESET_ALL}"
-                                f"{Fore.MAGENTA+Style.BRIGHT}-{Style.RESET_ALL}"
-                                f"{Fore.WHITE+Style.BRIGHT} {task['title']} {Style.RESET_ALL}"
-                                f"{Fore.GREEN+Style.BRIGHT}Is Completed{Style.RESET_ALL}"
-                                f"{Fore.MAGENTA+Style.BRIGHT}] [ Reward{Style.RESET_ALL}"
-                                f"{Fore.WHITE+Style.BRIGHT} {complete['reward']} {Style.RESET_ALL}"
-                                f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
-                            )
                         else:
                             self.log(
                                 f"{Fore.MAGENTA+Style.BRIGHT}[ Task{Style.RESET_ALL}"
                                 f"{Fore.WHITE+Style.BRIGHT} {task['category']} {Style.RESET_ALL}"
                                 f"{Fore.MAGENTA+Style.BRIGHT}-{Style.RESET_ALL}"
                                 f"{Fore.WHITE+Style.BRIGHT} {task['title']} {Style.RESET_ALL}"
-                                f"{Fore.RED+Style.BRIGHT}Isn't Completed{Style.RESET_ALL}"
+                                f"{Fore.GREEN+Style.BRIGHT}Is Started{Style.RESET_ALL}"
                                 f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
                             )
+
+                            complete = self.complete_tasks(query, task_type)
+                            if complete['is_completed']:
+                                self.log(
+                                    f"{Fore.MAGENTA+Style.BRIGHT}[ Task{Style.RESET_ALL}"
+                                    f"{Fore.WHITE+Style.BRIGHT} {task['category']} {Style.RESET_ALL}"
+                                    f"{Fore.MAGENTA+Style.BRIGHT}-{Style.RESET_ALL}"
+                                    f"{Fore.WHITE+Style.BRIGHT} {task['title']} {Style.RESET_ALL}"
+                                    f"{Fore.GREEN+Style.BRIGHT}Is Completed{Style.RESET_ALL}"
+                                    f"{Fore.MAGENTA+Style.BRIGHT}] [ Reward{Style.RESET_ALL}"
+                                    f"{Fore.WHITE+Style.BRIGHT} {complete['reward']} {Style.RESET_ALL}"
+                                    f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                                )
+                            else:
+                                self.log(
+                                    f"{Fore.MAGENTA+Style.BRIGHT}[ Task{Style.RESET_ALL}"
+                                    f"{Fore.WHITE+Style.BRIGHT} {task['category']} {Style.RESET_ALL}"
+                                    f"{Fore.MAGENTA+Style.BRIGHT}-{Style.RESET_ALL}"
+                                    f"{Fore.WHITE+Style.BRIGHT} {task['title']} {Style.RESET_ALL}"
+                                    f"{Fore.RED+Style.BRIGHT}Isn't Completed{Style.RESET_ALL}"
+                                    f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
+                                )
             else:
                 self.log(
                     f"{Fore.MAGENTA+Style.BRIGHT}[ Task{Style.RESET_ALL}"
