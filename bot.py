@@ -324,6 +324,7 @@ class Agent301:
         return game_puzzle, puzzle_combo
 
     def process_query(self, query: str, game_puzzle: bool, puzzle_combo):
+
         user = self.load_data(query)
         get_me = self.get_me(query)
         if get_me:
@@ -361,7 +362,7 @@ class Agent301:
                                     f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
                                 )
                                 complete = self.complete_tasks(query, task_type)
-                                if complete['is_completed']:
+                                if complete and complete['is_completed']:
                                     self.log(
                                         f"{Fore.MAGENTA+Style.BRIGHT}[ Task{Style.RESET_ALL}"
                                         f"{Fore.WHITE+Style.BRIGHT} {task['category']} {Style.RESET_ALL}"
@@ -394,7 +395,7 @@ class Agent301:
                             )
 
                             complete = self.complete_tasks(query, task_type)
-                            if complete['is_completed']:
+                            if complete and complete['is_completed']:
                                 self.log(
                                     f"{Fore.MAGENTA+Style.BRIGHT}[ Task{Style.RESET_ALL}"
                                     f"{Fore.WHITE+Style.BRIGHT} {task['category']} {Style.RESET_ALL}"
@@ -428,12 +429,12 @@ class Agent301:
                     attempt = puzzle['attemptsLeft']
                     if attempt > 0:
                         check = self.check_cards(query, puzzle_combo)
-                        if check['isCorrect']:
+                        if check and check['isCorrect']:
                             self.log(
                                 f"{Fore.MAGENTA+Style.BRIGHT}[ Game Puzzle{Style.RESET_ALL}"
                                 f"{Fore.GREEN+Style.BRIGHT} Is Success {Style.RESET_ALL}"
                                 f"{Fore.MAGENTA+Style.BRIGHT}] [ Result{Style.RESET_ALL}"
-                                f"{Fore.RED+Style.BRIGHT} You Win {Style.RESET_ALL}"
+                                f"{Fore.GREEN+Style.BRIGHT} You Win {Style.RESET_ALL}"
                                 f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
                             )
                         else:
