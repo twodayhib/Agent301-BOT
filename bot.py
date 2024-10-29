@@ -180,6 +180,35 @@ class Agent301:
                         time.sleep(2)
                     else:
                         return None
+                    
+    def task_wheel(self, query: str, task: str, retries=3):
+        url = "https://api.agent301.org/wheel/task"
+        data = json.dumps({'type':task})
+        self.headers.update({ 
+            'Authorization': query,
+            'Content-Type': 'application/json'
+        })
+
+        for attempt in range(retries):
+            try:
+                response = self.session.post(url, headers=self.headers, data=data)
+                data = response.json()
+                if data['ok']:
+                    return data['result']
+                else:
+                    return None
+            except (requests.RequestException, requests.HTTPError, ValueError) as e:
+                    if attempt < retries - 1:
+                        print(
+                            f"{Fore.RED + Style.BRIGHT}HTTP ERROR:{Style.RESET_ALL}"
+                            f"{Fore.YELLOW + Style.BRIGHT} Retrying... {Style.RESET_ALL}"
+                            f"{Fore.WHITE + Style.BRIGHT} [{attempt+1}/{retries}] {Style.RESET_ALL}",
+                            end="\r",
+                            flush=True
+                        )
+                        time.sleep(2)
+                    else:
+                        return None
     
     def spin_wheel(self, query: str, retries=3):
         url = "https://api.agent301.org/wheel/spin"
@@ -210,7 +239,91 @@ class Agent301:
                     else:
                         return None
     
-    def process_query(self, query: str):
+    def load_cards(self, query: str, retries=3):
+        url = "https://api.agent301.org/cards/load"
+        data = {}
+        self.headers.update({ 
+            'Authorization': query,
+            'Content-Type': 'application/json'
+        })
+
+        for attempt in range(retries):
+            try:
+                response = self.session.post(url, headers=self.headers, json=data)
+                response.raise_for_status()
+                data = response.json()
+                if data:
+                    return data['result']
+                else:
+                    return None
+            except (requests.RequestException, requests.HTTPError, ValueError) as e:
+                    if attempt < retries - 1:
+                        print(
+                            f"{Fore.RED + Style.BRIGHT}HTTP ERROR:{Style.RESET_ALL}"
+                            f"{Fore.YELLOW + Style.BRIGHT} Retrying... {Style.RESET_ALL}"
+                            f"{Fore.WHITE + Style.BRIGHT} [{attempt+1}/{retries}] {Style.RESET_ALL}",
+                            end="\r",
+                            flush=True
+                        )
+                        time.sleep(2)
+                    else:
+                        return None
+                    
+    def check_cards(self, query: str, puzzle_combo, retries=3):
+        url = "https://api.agent301.org/cards/check"
+        data = json.dumps({"cards":puzzle_combo})
+        self.headers.update({ 
+            'Authorization': query,
+            'Content-Type': 'application/json'
+        })
+
+        for attempt in range(retries):
+            try:
+                response = self.session.post(url, headers=self.headers, data=data)
+                response.raise_for_status()
+                data = response.json()
+                if data:
+                    return data['result']
+                else:
+                    return None
+            except (requests.RequestException, requests.HTTPError, ValueError) as e:
+                    if attempt < retries - 1:
+                        print(
+                            f"{Fore.RED + Style.BRIGHT}HTTP ERROR:{Style.RESET_ALL}"
+                            f"{Fore.YELLOW + Style.BRIGHT} Retrying... {Style.RESET_ALL}"
+                            f"{Fore.WHITE + Style.BRIGHT} [{attempt+1}/{retries}] {Style.RESET_ALL}",
+                            end="\r",
+                            flush=True
+                        )
+                        time.sleep(2)
+                    else:
+                        return None
+        
+    def question(self):
+        while True:
+            game_puzzle = input("Auto Play Game Puzzle? [y/n] -> ").strip().lower()
+            if game_puzzle in ["y", "n"]:
+                game_puzzle = game_puzzle == "y"
+                break
+            else:
+                print(f"{Fore.RED+Style.BRIGHT}Invalid Input.{Fore.WHITE+Style.BRIGHT} Choose 'y' or 'n'.{Style.RESET_ALL}")
+
+        puzzle_combo = []
+        if game_puzzle:
+            while True:
+                try:
+                    choices = input("Enter The 4 Number Combo Puzzle [ex: 1,2,3,4] -> ").strip()
+                    puzzle_combo = [int(x) for x in choices.split(',')]
+                    if len(puzzle_combo) == 4:
+                        break
+                    else:
+                        print(f"{Fore.RED+Style.BRIGHT}The Number Entered Must Be Exactly 4.{Style.RESET_ALL}")
+                except ValueError:
+                    print(f"{Fore.RED+Style.BRIGHT}Invalid input. Use numbers separated by commas.{Style.RESET_ALL}")
+
+        return game_puzzle, puzzle_combo
+
+    def process_query(self, query: str, game_puzzle: bool, puzzle_combo):
         user = self.load_data(query)
         get_me = self.get_me(query)
         if get_me:
@@ -309,15 +422,121 @@ class Agent301:
                 )
             time.sleep(1)
 
+            if game_puzzle:
+                puzzle = self.load_cards(query)
+                if puzzle:
+                    attempt = puzzle['attemptsLeft']
+                    if attempt > 0:
+                        check = self.check_cards(query, puzzle_combo)
+                        if check['isCorrect']:
+                            self.log(
+                                f"{Fore.MAGENTA+Style.BRIGHT}[ Game Puzzle{Style.RESET_ALL}"
+                                f"{Fore.GREEN+Style.BRIGHT} Is Success {Style.RESET_ALL}"
+                                f"{Fore.MAGENTA+Style.BRIGHT}] [ Result{Style.RESET_ALL}"
+                                f"{Fore.RED+Style.BRIGHT} You Win {Style.RESET_ALL}"
+                                f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                            )
+                        else:
+                            self.log(
+                                f"{Fore.MAGENTA+Style.BRIGHT}[ Game Puzzle{Style.RESET_ALL}"
+                                f"{Fore.GREEN+Style.BRIGHT} Is Success {Style.RESET_ALL}"
+                                f"{Fore.MAGENTA+Style.BRIGHT}] [ Result{Style.RESET_ALL}"
+                                f"{Fore.RED+Style.BRIGHT} You Lose {Style.RESET_ALL}"
+                                f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                            )
+                    else:
+                        self.log(
+                            f"{Fore.MAGENTA+Style.BRIGHT}[ Game Puzzle{Style.RESET_ALL}"
+                            f"{Fore.YELLOW+Style.BRIGHT} No Attempt Left {Style.RESET_ALL}"
+                            f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                        )
+            else:
+                self.log(
+                    f"{Fore.MAGENTA+Style.BRIGHT}[ Game Puzzle{Style.RESET_ALL}"
+                    f"{Fore.YELLOW+Style.BRIGHT} Is Skipped {Style.RESET_ALL}"
+                    f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                )
+            time.sleep(1)
+
             wheels = self.load_wheel(query)
             if wheels:
+                tasks = wheels['tasks']
+                
+
+                for task_name, task_data in tasks.items():
+                    if task_name == "hour":
+                        count = task_data['count']
+
+                        while count < 5:
+                            complete = self.task_wheel(query, task_name)
+                            if complete:
+                                count += 1
+                                task_data['count'] = count
+                                self.log(
+                                    f"{Fore.MAGENTA+Style.BRIGHT}[ Task Wheel{Style.RESET_ALL}"
+                                    f"{Fore.WHITE+Style.BRIGHT} Watch Ads {Style.RESET_ALL}"
+                                    f"{Fore.GREEN+Style.BRIGHT}Is Completed{Style.RESET_ALL}"
+                                    f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
+                                    f"{Fore.WHITE+Style.BRIGHT}[{count}/5]{Style.RESET_ALL}"
+                                )
+                            else:
+                                break
+
+                    elif task_name == "daily":
+                        complete = self.task_wheel(query, task_name)
+                        if complete:
+                            self.log(
+                                f"{Fore.MAGENTA+Style.BRIGHT}[ Task Wheel{Style.RESET_ALL}"
+                                f"{Fore.WHITE+Style.BRIGHT} Daily {Style.RESET_ALL}"
+                                f"{Fore.GREEN+Style.BRIGHT}Is Completed{Style.RESET_ALL}"
+                                f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
+                            )
+                        else:
+                            self.log(
+                                f"{Fore.MAGENTA+Style.BRIGHT}[ Task Wheel{Style.RESET_ALL}"
+                                f"{Fore.WHITE+Style.BRIGHT} Daily {Style.RESET_ALL}"
+                                f"{Fore.YELLOW+Style.BRIGHT}Is Already Completed{Style.RESET_ALL}"
+                                f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
+                            )
+
+                    else:
+                        if not task_data:
+                            complete = self.task_wheel(query, task_name)
+                            if complete:
+                                self.log(
+                                    f"{Fore.MAGENTA+Style.BRIGHT}[ Task Wheel{Style.RESET_ALL}"
+                                    f"{Fore.WHITE+Style.BRIGHT} {task_name.upper()} {Style.RESET_ALL}"
+                                    f"{Fore.GREEN+Style.BRIGHT}Is Completed{Style.RESET_ALL}"
+                                    f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
+                                )
+                            else:
+                                self.log(
+                                    f"{Fore.MAGENTA+Style.BRIGHT}[ Task Wheel{Style.RESET_ALL}"
+                                    f"{Fore.WHITE+Style.BRIGHT} {task_name.upper()} {Style.RESET_ALL}"
+                                    f"{Fore.RED+Style.BRIGHT}Isn't Completed{Style.RESET_ALL}"
+                                    f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
+                                )
+                    time.sleep(1)
+
+                get_me = self.get_me(query)
                 tickets = get_me['tickets']
+                balance = get_me['balance']
+                self.log(
+                        f"{Fore.MAGENTA + Style.BRIGHT}[ Account{Style.RESET_ALL}"
+                        f"{Fore.WHITE + Style.BRIGHT} {user} {Style.RESET_ALL}"
+                        f"{Fore.MAGENTA+Style.BRIGHT}] [ Balance{Style.RESET_ALL}"
+                        f"{Fore.WHITE+Style.BRIGHT} {balance} {Style.RESET_ALL}"
+                        f"{Fore.MAGENTA+Style.BRIGHT}] [ Ticket{Style.RESET_ALL}"
+                        f"{Fore.WHITE + Style.BRIGHT} {tickets} {Style.RESET_ALL}"
+                        f"{Fore.MAGENTA + Style.BRIGHT}]{Style.RESET_ALL}"
+                    )
+                time.sleep(1)
                 while tickets > 0:
                     self.log(
                         f"{Fore.MAGENTA + Style.BRIGHT}[ Spin Wheel{Style.RESET_ALL}"
                         f"{Fore.GREEN + Style.BRIGHT} Is Started {Style.RESET_ALL}"
                         f"{Fore.MAGENTA + Style.BRIGHT}] [ Remaining Ticket{Style.RESET_ALL}"
-                        f"{Fore.WHITE + Style.BRIGHT} {tickets} {Style.RESET_ALL}"
+                        f"{Fore.WHITE + Style.BRIGHT} {tickets-1} {Style.RESET_ALL}"
                         f"{Fore.MAGENTA + Style.BRIGHT}]{Style.RESET_ALL}"
                     )
                     time.sleep(5)
@@ -367,6 +586,8 @@ class Agent301:
             with open('query.txt', 'r') as file:
                 queries = [line.strip() for line in file if line.strip()]
 
+            game_puzzle, puzzle_combo = self.question()
+
             while True:
                 self.clear_terminal()
                 time.sleep(1)
@@ -380,8 +601,9 @@ class Agent301:
                 for query in queries:
                     query = query.strip()
                     if query:
-                        self.process_query(query)
+                        self.process_query(query, game_puzzle, puzzle_combo)
                         self.log(f"{Fore.CYAN + Style.BRIGHT}-------------------------------------------------------------------{Style.RESET_ALL}")
+                        time.sleep(3)
 
                 seconds = 1800
                 while seconds > 0:
