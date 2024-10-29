@@ -8,8 +8,11 @@ Register Here : [Agent301](https://t.me/Agent301Bot/app?startapp=onetime14934820
   - Auto Get Account Information
   - Auto Claim Daily Checkin
   - Auto Auto Clear Task
+  - Auto Play Puzzle Game [y/n]
   - Auto Play Spin Wheel
   - Multi Account
+
+  Note: For puzzle games, enter the 4 combo numbers you get. `ex: 1,2,3,4`
 
 ## Prasyarat
 
