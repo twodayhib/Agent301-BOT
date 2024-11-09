@@ -75,7 +75,7 @@ class Agent301:
                 response = self.session.post(url, headers=self.headers)
                 response.raise_for_status()
                 result = response.json()
-                if result['ok']:
+                if result and result['ok']:
                     return result['result']
                 else:
                     return None
@@ -104,7 +104,7 @@ class Agent301:
                 response = self.session.post(url, headers=self.headers)
                 response.raise_for_status()
                 result = response.json()
-                if result['ok']:
+                if result and result['ok']:
                     return result['result']['data']
                 else:
                     return None
@@ -135,7 +135,7 @@ class Agent301:
                 response = self.session.post(url, headers=self.headers, data=data)
                 response.raise_for_status()
                 result = response.json()
-                if result['ok']:
+                if result and result['ok']:
                     return result['result']
                 else:
                     return None
@@ -163,9 +163,9 @@ class Agent301:
             try:
                 response = self.session.post(url, headers=self.headers)
                 response.raise_for_status()
-                data = response.json()
-                if data['ok']:
-                    return data['result']
+                result = response.json()
+                if result and result['ok']:
+                    return result['result']
                 else:
                     return None
             except (requests.RequestException, requests.HTTPError, ValueError) as e:
@@ -192,9 +192,9 @@ class Agent301:
         for attempt in range(retries):
             try:
                 response = self.session.post(url, headers=self.headers, data=data)
-                data = response.json()
-                if data['ok']:
-                    return data['result']
+                result = response.json()
+                if result and result['ok']:
+                    return result['result']
                 else:
                     return None
             except (requests.RequestException, requests.HTTPError, ValueError) as e:
@@ -221,9 +221,9 @@ class Agent301:
             try:
                 response = self.session.post(url, headers=self.headers)
                 response.raise_for_status()
-                data = response.json()
-                if data['ok']:
-                    return data['result']
+                result = response.json()
+                if result and result['ok']:
+                    return result['result']
                 else:
                     return None
             except (requests.RequestException, requests.HTTPError, ValueError) as e:
@@ -251,9 +251,9 @@ class Agent301:
             try:
                 response = self.session.post(url, headers=self.headers, json=data)
                 response.raise_for_status()
-                data = response.json()
-                if data:
-                    return data['result']
+                result = response.json()
+                if result and result['result']:
+                    return result['result']
                 else:
                     return None
             except (requests.RequestException, requests.HTTPError, ValueError) as e:
@@ -281,9 +281,9 @@ class Agent301:
             try:
                 response = self.session.post(url, headers=self.headers, data=data)
                 response.raise_for_status()
-                data = response.json()
-                if data:
-                    return data['result']
+                result = response.json()
+                if result and result['result']:
+                    return result['result']
                 else:
                     return None
             except (requests.RequestException, requests.HTTPError, ValueError) as e:
@@ -597,13 +597,13 @@ class Agent301:
                     f"{Fore.GREEN + Style.BRIGHT}Account's Total: {Style.RESET_ALL}"
                     f"{Fore.WHITE + Style.BRIGHT}{len(queries)}{Style.RESET_ALL}"
                 )
-                self.log(f"{Fore.CYAN + Style.BRIGHT}-------------------------------------------------------------------{Style.RESET_ALL}")
+                self.log(f"{Fore.CYAN + Style.BRIGHT}-{Style.RESET_ALL}"*75)
                 
                 for query in queries:
                     query = query.strip()
                     if query:
                         self.process_query(query, game_puzzle, puzzle_combo)
-                        self.log(f"{Fore.CYAN + Style.BRIGHT}-------------------------------------------------------------------{Style.RESET_ALL}")
+                        self.log(f"{Fore.CYAN + Style.BRIGHT}-{Style.RESET_ALL}"*75)
                         time.sleep(3)
 
                 seconds = 1800
