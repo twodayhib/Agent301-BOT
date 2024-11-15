@@ -345,7 +345,7 @@ class Agent301:
                     task_type = task['type']
                     claimed = task['is_claimed']
 
-                    if task and not claimed:
+                    if task is not None and not claimed:
                         if task['type'] == 'video':
                             count = task['count']
                             max_count = task['max_count']
@@ -462,10 +462,8 @@ class Agent301:
             wheels = self.load_wheel(query)
             if wheels:
                 tasks = wheels['tasks']
-                
-
                 for task_name, task_data in tasks.items():
-                    if task_name == "hour":
+                    if task_name is not None and task_name == "hour":
                         count = task_data['count']
 
                         while count < 5:
@@ -483,7 +481,7 @@ class Agent301:
                             else:
                                 break
 
-                    elif task_name == "daily":
+                    elif task_name is not None and task_name == "daily":
                         complete = self.task_wheel(query, task_name)
                         if complete:
                             self.log(
