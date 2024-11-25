@@ -58,12 +58,12 @@ class Agent301:
         if query:
             user_data_json = urllib.parse.unquote(query)
             user_data = json.loads(user_data_json)
-            first_name = user_data['first_name']
+            first_name = user_data.get('first_name', 'Unknown')
             return first_name
         else:
             raise ValueError("User data not found in query.")
         
-    def get_me(self, query: str, retries=3):
+    def user_data(self, query: str, retries=5):
         url = "https://api.agent301.org/getMe"
         self.headers.update({ 
             'Authorization': query,
@@ -72,13 +72,9 @@ class Agent301:
         
         for attempt in range(retries):
             try:
-                response = self.session.post(url, headers=self.headers)
+                response = self.session.post(url, headers=self.headers, timeout=10)
                 response.raise_for_status()
-                result = response.json()
-                if result and result['ok']:
-                    return result['result']
-                else:
-                    return None
+                return response.json()['result']
             except (requests.RequestException, requests.HTTPError, ValueError) as e:
                 if attempt < retries - 1:
                     print(
@@ -92,7 +88,7 @@ class Agent301:
                 else:
                     return None
     
-    def get_tasks(self, query: str, retries=3):
+    def get_tasks(self, query: str, retries=5):
         url = "https://api.agent301.org/getTasks"
         self.headers.update({ 
             'Authorization': query,
@@ -101,13 +97,9 @@ class Agent301:
         
         for attempt in range(retries):
             try:
-                response = self.session.post(url, headers=self.headers)
+                response = self.session.post(url, headers=self.headers, timeout=10)
                 response.raise_for_status()
-                result = response.json()
-                if result and result['ok']:
-                    return result['result']['data']
-                else:
-                    return None
+                return response.json()['result']['data']
             except (requests.RequestException, requests.HTTPError, ValueError) as e:
                 if attempt < retries - 1:
                     print(
@@ -121,7 +113,7 @@ class Agent301:
                 else:
                     return None
     
-    def complete_tasks(self, query: str, task_type: str, retries=3):
+    def complete_tasks(self, query: str, task_type: str, retries=5):
         url = "https://api.agent301.org/completeTask"
         data = json.dumps({'type':task_type})
         self.headers.update({ 
@@ -130,15 +122,13 @@ class Agent301:
         })
 
         for attempt in range(retries):
-        
             try:
-                response = self.session.post(url, headers=self.headers, data=data)
-                response.raise_for_status()
-                result = response.json()
-                if result and result['ok']:
-                    return result['result']
-                else:
+                response = self.session.post(url, headers=self.headers, data=data, timeout=10)
+                if response.status_code == 500:
                     return None
+                
+                response.raise_for_status()
+                return response.json()['result']
             except (requests.RequestException, requests.HTTPError, ValueError) as e:
                 if attempt < retries - 1:
                     print(
@@ -152,7 +142,7 @@ class Agent301:
                 else:
                     return None
     
-    def load_wheel(self, query: str, retries=3):
+    def load_wheel(self, query: str, retries=5):
         url = "https://api.agent301.org/wheel/load"
         self.headers.update({ 
             'Authorization': query,
@@ -161,13 +151,9 @@ class Agent301:
 
         for attempt in range(retries):
             try:
-                response = self.session.post(url, headers=self.headers)
+                response = self.session.post(url, headers=self.headers, timeout=10)
                 response.raise_for_status()
-                result = response.json()
-                if result and result['ok']:
-                    return result['result']
-                else:
-                    return None
+                return response.json()['result']
             except (requests.RequestException, requests.HTTPError, ValueError) as e:
                     if attempt < retries - 1:
                         print(
@@ -181,7 +167,7 @@ class Agent301:
                     else:
                         return None
                     
-    def task_wheel(self, query: str, task: str, retries=3):
+    def task_wheel(self, query: str, task: str, retries=5):
         url = "https://api.agent301.org/wheel/task"
         data = json.dumps({'type':task})
         self.headers.update({ 
@@ -191,13 +177,13 @@ class Agent301:
 
         for attempt in range(retries):
             try:
-                response = self.session.post(url, headers=self.headers, data=data)
-                result = response.json()
-                if result and result['ok']:
-                    return result['result']
-                else:
+                response = self.session.post(url, headers=self.headers, data=data, timeout=10)
+                if response.status_code in [403, 404]:
                     return None
-            except (requests.RequestException, requests.HTTPError, ValueError) as e:
+                
+                response.raise_for_status()
+                return response.json()['result']
+            except (requests.RequestException, requests.Timeout, ValueError) as e:
                     if attempt < retries - 1:
                         print(
                             f"{Fore.RED + Style.BRIGHT}HTTP ERROR:{Style.RESET_ALL}"
@@ -210,7 +196,7 @@ class Agent301:
                     else:
                         return None
     
-    def spin_wheel(self, query: str, retries=3):
+    def spin_wheel(self, query: str, retries=5):
         url = "https://api.agent301.org/wheel/spin"
         self.headers.update({ 
             'Authorization': query,
@@ -219,13 +205,9 @@ class Agent301:
 
         for attempt in range(retries):
             try:
-                response = self.session.post(url, headers=self.headers)
+                response = self.session.post(url, headers=self.headers, timeout=10)
                 response.raise_for_status()
-                result = response.json()
-                if result and result['ok']:
-                    return result['result']
-                else:
-                    return None
+                return response.json()['result']
             except (requests.RequestException, requests.HTTPError, ValueError) as e:
                     if attempt < retries - 1:
                         print(
@@ -239,7 +221,7 @@ class Agent301:
                     else:
                         return None
     
-    def load_cards(self, query: str, retries=3):
+    def load_cards(self, query: str, retries=5):
         url = "https://api.agent301.org/cards/load"
         data = {}
         self.headers.update({ 
@@ -249,13 +231,9 @@ class Agent301:
 
         for attempt in range(retries):
             try:
-                response = self.session.post(url, headers=self.headers, json=data)
+                response = self.session.post(url, headers=self.headers, json=data, timeout=10)
                 response.raise_for_status()
-                result = response.json()
-                if result and result['result']:
-                    return result['result']
-                else:
-                    return None
+                return response.json()['result']
             except (requests.RequestException, requests.HTTPError, ValueError) as e:
                     if attempt < retries - 1:
                         print(
@@ -269,7 +247,7 @@ class Agent301:
                     else:
                         return None
                     
-    def check_cards(self, query: str, puzzle_combo, retries=3):
+    def check_cards(self, query: str, puzzle_combo, retries=5):
         url = "https://api.agent301.org/cards/check"
         data = json.dumps({"cards":puzzle_combo})
         self.headers.update({ 
@@ -279,13 +257,9 @@ class Agent301:
 
         for attempt in range(retries):
             try:
-                response = self.session.post(url, headers=self.headers, data=data)
+                response = self.session.post(url, headers=self.headers, data=data, timeout=10)
                 response.raise_for_status()
-                result = response.json()
-                if result and result['result']:
-                    return result['result']
-                else:
-                    return None
+                return response.json()['result']
             except (requests.RequestException, requests.HTTPError, ValueError) as e:
                     if attempt < retries - 1:
                         print(
@@ -324,17 +298,25 @@ class Agent301:
         return game_puzzle, puzzle_combo
 
     def process_query(self, query: str, game_puzzle: bool, puzzle_combo):
-
-        user = self.load_data(query)
-        get_me = self.get_me(query)
-        if get_me:
+        account = self.load_data(query)
+        user = self.user_data(query)
+        if not user:
             self.log(
                 f"{Fore.MAGENTA+Style.BRIGHT}[ Account{Style.RESET_ALL}"
-                f"{Fore.WHITE+Style.BRIGHT} {user} {Style.RESET_ALL}"
+                f"{Fore.WHITE+Style.BRIGHT} {account} {Style.RESET_ALL}"
+                f"{Fore.RED+Style.BRIGHT} Query Id Isn't Valid {Style.RESET_ALL}"
+                f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
+            )
+            return
+        
+        if user:
+            self.log(
+                f"{Fore.MAGENTA+Style.BRIGHT}[ Account{Style.RESET_ALL}"
+                f"{Fore.WHITE+Style.BRIGHT} {account} {Style.RESET_ALL}"
                 f"{Fore.MAGENTA+Style.BRIGHT}] [ Balance{Style.RESET_ALL}"
-                f"{Fore.WHITE+Style.BRIGHT} {get_me['balance']} {Style.RESET_ALL}"
+                f"{Fore.WHITE+Style.BRIGHT} {user['balance']} {Style.RESET_ALL}"
                 f"{Fore.MAGENTA+Style.BRIGHT}] [ Ticket{Style.RESET_ALL}"
-                f"{Fore.WHITE+Style.BRIGHT} {get_me['tickets']} {Style.RESET_ALL}"
+                f"{Fore.WHITE+Style.BRIGHT} {user['tickets']} {Style.RESET_ALL}"
                 f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
             )
             time.sleep(1)
@@ -345,12 +327,13 @@ class Agent301:
                     task_type = task['type']
                     claimed = task['is_claimed']
 
-                    if task is not None and not claimed:
+                    if task and not claimed:
                         if task['type'] == 'video':
                             count = task['count']
                             max_count = task['max_count']
 
                             while count < max_count:
+                                count += 1
                                 self.log(
                                     f"{Fore.MAGENTA+Style.BRIGHT}[ Task{Style.RESET_ALL}"
                                     f"{Fore.WHITE+Style.BRIGHT} {task['category']} {Style.RESET_ALL}"
@@ -361,6 +344,7 @@ class Agent301:
                                     f"{Fore.WHITE+Style.BRIGHT} {count+1}/{max_count} {Style.RESET_ALL}"
                                     f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
                                 )
+
                                 complete = self.complete_tasks(query, task_type)
                                 if complete and complete['is_completed']:
                                     self.log(
@@ -382,7 +366,6 @@ class Agent301:
                                         f"{Fore.RED+Style.BRIGHT}Isn't Completed{Style.RESET_ALL}"
                                         f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
                                     )
-                                count += 1
 
                         else:
                             self.log(
@@ -418,7 +401,7 @@ class Agent301:
             else:
                 self.log(
                     f"{Fore.MAGENTA+Style.BRIGHT}[ Task{Style.RESET_ALL}"
-                    f"{Fore.RED+Style.BRIGHT} Is None {Style.RESET_ALL}"
+                    f"{Fore.RED+Style.BRIGHT} Data Is None {Style.RESET_ALL}"
                     f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
                 )
             time.sleep(1)
@@ -451,6 +434,12 @@ class Agent301:
                             f"{Fore.YELLOW+Style.BRIGHT} No Attempt Left {Style.RESET_ALL}"
                             f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
                         )
+                else:
+                    self.log(
+                        f"{Fore.MAGENTA+Style.BRIGHT}[ Game Puzzle{Style.RESET_ALL}"
+                        f"{Fore.RED+Style.BRIGHT} Data Is None {Style.RESET_ALL}"
+                        f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
+                    )
             else:
                 self.log(
                     f"{Fore.MAGENTA+Style.BRIGHT}[ Game Puzzle{Style.RESET_ALL}"
@@ -517,12 +506,12 @@ class Agent301:
                                 )
                     time.sleep(1)
 
-                get_me = self.get_me(query)
-                tickets = get_me['tickets']
-                balance = get_me['balance']
+                user = self.user_data(query)
+                tickets = user['tickets']
+                balance = user['balance']
                 self.log(
                         f"{Fore.MAGENTA + Style.BRIGHT}[ Account{Style.RESET_ALL}"
-                        f"{Fore.WHITE + Style.BRIGHT} {user} {Style.RESET_ALL}"
+                        f"{Fore.WHITE + Style.BRIGHT} {account} {Style.RESET_ALL}"
                         f"{Fore.MAGENTA+Style.BRIGHT}] [ Balance{Style.RESET_ALL}"
                         f"{Fore.WHITE+Style.BRIGHT} {balance} {Style.RESET_ALL}"
                         f"{Fore.MAGENTA+Style.BRIGHT}] [ Ticket{Style.RESET_ALL}"
@@ -567,18 +556,9 @@ class Agent301:
             else:
                 self.log(
                     f"{Fore.MAGENTA+Style.BRIGHT}[ Spin Wheel{Style.RESET_ALL}"
-                    f"{Fore.RED+Style.BRIGHT} Is None {Style.RESET_ALL}"
+                    f"{Fore.RED+Style.BRIGHT} Data Is None {Style.RESET_ALL}"
                     f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
                 )
-            time.sleep(1)
-
-        else:
-            self.log(
-                f"{Fore.MAGENTA+Style.BRIGHT}[ Account{Style.RESET_ALL}"
-                f"{Fore.RED+Style.BRIGHT} Is None {Style.RESET_ALL}"
-                f"{Fore.MAGENTA+Style.BRIGHT}]{Style.RESET_ALL}"
-            )
-        time.sleep(1)
 
     def main(self):
         try:
