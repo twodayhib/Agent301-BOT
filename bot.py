@@ -452,7 +452,7 @@ class Agent301:
             if wheels:
                 tasks = wheels['tasks']
                 for task_name, task_data in tasks.items():
-                    if task_name is not None and task_name == "hour":
+                    if task_name == "hour":
                         count = task_data['count']
 
                         while count < 5:
@@ -464,13 +464,19 @@ class Agent301:
                                     f"{Fore.MAGENTA+Style.BRIGHT}[ Task Wheel{Style.RESET_ALL}"
                                     f"{Fore.WHITE+Style.BRIGHT} Watch Ads {Style.RESET_ALL}"
                                     f"{Fore.GREEN+Style.BRIGHT}Is Completed{Style.RESET_ALL}"
-                                    f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
+                                    f"{Fore.MAGENTA+Style.BRIGHT} ] {Style.RESET_ALL}"
                                     f"{Fore.WHITE+Style.BRIGHT}[{count}/5]{Style.RESET_ALL}"
                                 )
                             else:
+                                self.log(
+                                    f"{Fore.MAGENTA+Style.BRIGHT}[ Task Wheel{Style.RESET_ALL}"
+                                    f"{Fore.WHITE+Style.BRIGHT} Watch Ads {Style.RESET_ALL}"
+                                    f"{Fore.YELLOW+Style.BRIGHT}Is Already Completed{Style.RESET_ALL}"
+                                    f"{Fore.MAGENTA+Style.BRIGHT} ]{Style.RESET_ALL}"
+                                )
                                 break
 
-                    elif task_name is not None and task_name == "daily":
+                    elif task_name == "daily":
                         complete = self.task_wheel(query, task_name)
                         if complete:
                             self.log(
